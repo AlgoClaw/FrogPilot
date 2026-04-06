@@ -372,6 +372,7 @@ public:
                                value_labels(value_labels),
                                label(label) {
     key = param.toStdString();
+    this->min_value = normalizeMinValue(min_value);
 
     setupButton(decrement_button, "-");
     setupButton(increment_button, "+");
@@ -483,7 +484,7 @@ public:
   }
 
   void updateControl(const float &newMinValue, const float &newMaxValue, const std::map<float, QString> &newValueLabels = {}) {
-    min_value = newMinValue;
+    min_value = normalizeMinValue(newMinValue);
     max_value = newMaxValue;
 
     value_labels = newValueLabels;
@@ -524,6 +525,10 @@ protected:
   QLabel *value_label;
 
 private:
+  float normalizeMinValue(float requestedMinValue) const {
+    return key == "AggressiveFollow" || key == "TrafficFollow" ? std::min(requestedMinValue, 0.5f) : requestedMinValue;
+  }
+
   bool decrement_repeating;
   bool display_warning;
   bool fast_increase;

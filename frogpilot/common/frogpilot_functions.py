@@ -146,6 +146,28 @@ def convert_params(params_cache):
 
     delete_file("/cache/tracking")
 
+  if not params.get_bool("AggressiveFollowHalfSecondMigration"):
+    aggressive_follow = params.get("AggressiveFollow", encoding="utf-8")
+    aggressive_follow_cache = params_cache.get("AggressiveFollow", encoding="utf-8")
+
+    legacy_aggressive_follow_values = {1.0, 1.25}
+
+    def is_legacy_aggressive_follow(raw_value):
+      if raw_value is None:
+        return False
+
+      try:
+        return any(abs(float(raw_value) - legacy_value) < 1e-3 for legacy_value in legacy_aggressive_follow_values)
+      except (TypeError, ValueError):
+        return False
+
+    if is_legacy_aggressive_follow(aggressive_follow) or is_legacy_aggressive_follow(aggressive_follow_cache):
+      params.put("AggressiveFollow", "0.5")
+      params_cache.put("AggressiveFollow", "0.5")
+      print("Migrated AggressiveFollow to 0.5 seconds")
+
+    params.put_bool("AggressiveFollowHalfSecondMigration", True)
+
   print("Param conversion completed")
 
 def frogpilot_boot_functions(build_metadata, params_cache):

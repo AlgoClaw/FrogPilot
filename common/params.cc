@@ -224,6 +224,7 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"AdvancedLateralTune", PERSISTENT},
     {"AdvancedLongitudinalTune", PERSISTENT},
     {"AggressiveFollow", PERSISTENT},
+    {"AggressiveFollowHalfSecondMigration", PERSISTENT},
     {"AggressiveJerkAcceleration", PERSISTENT},
     {"AggressiveJerkDanger", PERSISTENT},
     {"AggressiveJerkDeceleration", PERSISTENT},
