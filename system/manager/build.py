@@ -13,11 +13,30 @@ from openpilot.system.version import get_build_metadata
 
 MAX_CACHE_SIZE = 4e9 if "CI" in os.environ else 2e9
 CACHE_DIR = Path("/data/scons_cache" if AGNOS else "/tmp/scons_cache")
+UI_BINARY = Path(BASEDIR) / "selfdrive/ui/ui"
+AGGRESSIVE_SETTINGS_SOURCE = Path(BASEDIR) / "frogpilot/ui/qt/offroad/longitudinal_settings.cc"
 
 TOTAL_SCONS_NODES = 2820
 MAX_BUILD_PROGRESS = 100
 
+def invalidate_stale_ui_binary() -> None:
+  if not UI_BINARY.is_file() or not AGGRESSIVE_SETTINGS_SOURCE.is_file():
+    return
+
+  try:
+    source_text = AGGRESSIVE_SETTINGS_SOURCE.read_text(encoding="utf-8", errors="ignore")
+    if "Default: 0.50 seconds." not in source_text:
+      return
+
+    if b"Default: 1.25 seconds." in UI_BINARY.read_bytes():
+      UI_BINARY.unlink()
+      print("Removed stale selfdrive/ui/ui so SCons can rebuild the updated FrogPilot UI")
+  except Exception as exc:
+    print(f"Failed to invalidate stale selfdrive/ui/ui: {exc}")
+
 def build(spinner: Spinner, dirty: bool = False, minimal: bool = False) -> None:
+  invalidate_stale_ui_binary()
+
   env = os.environ.copy()
   env['SCONS_PROGRESS'] = "1"
   nproc = os.cpu_count()
