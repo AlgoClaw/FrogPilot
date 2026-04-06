@@ -162,7 +162,7 @@ frogpilot_default_params: list[tuple[str, str | bytes, int, str]] = [
   ("AdvancedCustomUI", "0", 2, "0"),
   ("AdvancedLateralTune", "0", 3, "0"),
   ("AdvancedLongitudinalTune", "0", 3, "0"),
-  ("AggressiveFollow", "1.25", 2, "1.25"),
+  ("AggressiveFollow", "0.5", 2, "0.5"),
   ("AggressiveJerkAcceleration", "50", 3, "50"),
   ("AggressiveJerkDanger", "100", 3, "100"),
   ("AggressiveJerkDeceleration", "50", 3, "50"),

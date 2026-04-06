@@ -693,7 +693,7 @@ GAS_BRAKE_TOGGLES = (
   ToggleDefinition(
     title=("Following Distance"),
     param="AggressiveFollow",
-    description=("<b>How many seconds openpilot follows behind lead vehicles when using the \"Aggressive\" profile.</b> Increase for more space; decrease for tighter gaps.<br><br>Default: 1.25 seconds."),
+    description=("<b>How many seconds openpilot follows behind lead vehicles when using the \"Aggressive\" profile.</b> Increase for more space; decrease for tighter gaps.<br><br>Default: 0.50 seconds."),
     max_value=3,
     min_value=0.5,
     parent_param="AggressivePersonalityProfile",
@@ -2874,4 +2874,3 @@ UTILITIES_TOGGLES = (
     tuning_level=0,
   ),
 )
-
