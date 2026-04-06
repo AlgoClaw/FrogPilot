@@ -1,0 +1,3 @@
+# This fork ships prebuilt panda firmware artifacts in panda/board/obj for
+# device installs. The full panda firmware source tree is not present here, so
+# the device-side openpilot rebuild path must treat this directory as a no-op.
