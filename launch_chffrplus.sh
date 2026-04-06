@@ -32,44 +32,6 @@ function agnos_init {
   fi
 }
 
-function stale_prebuilt_frogpilot_ui {
-  local aggressive_follow_source="$DIR/frogpilot/ui/qt/offroad/longitudinal_settings.cc"
-  local ui_binary="$DIR/selfdrive/ui/ui"
-
-  [ -f "$DIR/prebuilt" ] || return 1
-  [ -f "$aggressive_follow_source" ] || return 1
-  [ -f "$ui_binary" ] || return 1
-
-  grep -qF "Default: 0.50 seconds." "$aggressive_follow_source" || return 1
-  ! grep -aqF "Default: 0.50 seconds." "$ui_binary"
-}
-
-function mark_frogpilot_ui_sources_dirty {
-  local source_files=(
-    "$DIR/frogpilot/ui/qt/offroad/longitudinal_settings.cc"
-    "$DIR/frogpilot/ui/qt/widgets/frogpilot_controls.cc"
-    "$DIR/frogpilot/ui/qt/widgets/frogpilot_controls.h"
-    "$DIR/selfdrive/ui/qt/widgets/controls.cc"
-    "$DIR/selfdrive/ui/qt/widgets/controls.h"
-  )
-
-  for source_file in "${source_files[@]}"; do
-    [ -f "$source_file" ] && touch "$source_file"
-  done
-}
-
-function ensure_larch64_libyuv {
-  local libyuv_archive="$DIR/third_party/libyuv/larch64/lib/libyuv.a"
-  local libyuv_builder="$DIR/third_party/libyuv/build.sh"
-
-  [ -f /TICI ] || return 0
-  [ -f "$libyuv_archive" ] && return 0
-  [ -x "$libyuv_builder" ] || return 1
-
-  echo "Missing larch64 libyuv archive, building it before rebuilding FrogPilot UI"
-  "$libyuv_builder"
-}
-
 function launch {
   # Remove orphaned git lock if it exists on boot
   [ -f "$DIR/.git/index.lock" ] && rm -f $DIR/.git/index.lock
@@ -120,20 +82,10 @@ function launch {
   # write tmux scrollback to a file
   tmux capture-pane -pq -S-1000 > /tmp/launch_log
 
-  local force_prebuilt_build=0
-  if stale_prebuilt_frogpilot_ui; then
-    echo "Detected stale prebuilt FrogPilot UI binary, forcing a one-time rebuild from source"
-    mark_frogpilot_ui_sources_dirty
-    force_prebuilt_build=1
-  fi
-
   # start manager
   cd system/manager
   if [ ! -f "$DIR/prebuilt" ]; then
     ./build.py
-  elif [ "$force_prebuilt_build" -eq 1 ]; then
-    ensure_larch64_libyuv
-    SCONS_TARGETS="selfdrive/ui/ui" ./build.py
   fi
   ./manager.py
 
