@@ -165,6 +165,7 @@ def convert_params(params_cache):
     if is_legacy_aggressive_follow(aggressive_follow) or is_legacy_aggressive_follow(aggressive_follow_cache):
       params.put("AggressiveFollow", "0.5")
       params_cache.put("AggressiveFollow", "0.5")
+      params.put_bool("PondUploadPending", True)
       print("Migrated AggressiveFollow to 0.5 seconds")
 
     aggressive_follow_migration_marker.touch()

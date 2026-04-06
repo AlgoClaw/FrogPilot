@@ -193,6 +193,10 @@ protected:
   Params params;
 
   QButtonGroup *button_group;
+
+  void onParamChanged() override {
+    updateFrogPilotToggles();
+  }
 };
 
 class FrogPilotButtonsControl : public AbstractControl {
@@ -294,7 +298,12 @@ public:
     }
 
     QObject::connect(button_group, QOverload<int>::of(&QButtonGroup::buttonClicked), [=](int id) {
-      params.putBool(button_params[id].toStdString(), button_group->button(id)->isChecked());
+      const std::string button_param = button_params[id].toStdString();
+      const bool checked = button_group->button(id)->isChecked();
+      if (params.getBool(button_param) != checked) {
+        params.putBool(button_param, checked);
+        updateFrogPilotToggles();
+      }
       emit buttonClicked(id);
     });
   }
@@ -337,6 +346,11 @@ public:
   void showEvent(QShowEvent *event) override {
     refresh();
     ParamControl::showEvent(event);
+  }
+
+protected:
+  void onParamChanged() override {
+    updateFrogPilotToggles();
   }
 
 signals:
@@ -506,7 +520,13 @@ public:
   }
 
   void updateParam() {
+    const float stored_value = params.getFloat(key);
+    if (std::abs(stored_value - value) <= 1e-6f) {
+      return;
+    }
+
     params.putFloat(key, value);
+    updateFrogPilotToggles();
   }
 
   void updateValue() {
@@ -585,7 +605,12 @@ public:
 
     QObject::connect(button_group, QOverload<int>::of(&QButtonGroup::buttonClicked), [=](int id) {
       if (checkable) {
-        params.putBool(button_params[id].toStdString(), button_group->button(id)->isChecked());
+        const std::string button_param = button_params[id].toStdString();
+        const bool checked = button_group->button(id)->isChecked();
+        if (params.getBool(button_param) != checked) {
+          params.putBool(button_param, checked);
+          updateFrogPilotToggles();
+        }
       }
       emit buttonClicked(id);
     });

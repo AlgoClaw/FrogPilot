@@ -175,6 +175,9 @@ public:
     refresh();
   }
 
+protected:
+  virtual void onParamChanged() {}
+
 private:
   void toggleClicked(bool state);
   void setIcon(bool state) {

@@ -265,10 +265,24 @@ def sync_thread():
     parked = sm["frogpilotCarState"].isParked
     started = sm["deviceState"].started
     state_changed = started != previous_started or parked != previous_parked
+    uploaded_local_toggles = False
 
     if params.get_bool("PondPaired"):
       presence_interval = POND_PRESENCE_INTERVAL_ACTIVE if started or pond_active else POND_PRESENCE_INTERVAL_IDLE
       ping_pond_presence(presence_interval, parked, started, state_changed)
+
+    if params.get_bool("PondUploadPending"):
+      if not params.get_bool("PondPaired"):
+        params.put_bool("PondUploadPending", False)
+      elif upload_toggles():
+        params.put_bool("PondUploadPending", False)
+        uploaded_local_toggles = True
+
+    if uploaded_local_toggles:
+      previous_parked = parked
+      previous_started = started
+      rate_keeper.keep_time()
+      continue
 
     if not boot_sync_complete and system_time_valid():
       boot_pond_active = check_toggles(False, boot_run=True)
@@ -285,12 +299,6 @@ def sync_thread():
       if latest_pond_active is not None:
         pond_active = latest_pond_active
       next_toggle_check_at = now + REMOTE_TOGGLE_CHECK_INTERVAL_ACTIVE if pond_active else REMOTE_TOGGLE_CHECK_INTERVAL_IDLE
-
-    if params.get_bool("PondUploadPending"):
-      if not params.get_bool("PondPaired"):
-        params.put_bool("PondUploadPending", False)
-      elif upload_toggles():
-        params.put_bool("PondUploadPending", False)
 
     previous_parked = parked
     previous_started = started

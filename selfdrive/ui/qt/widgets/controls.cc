@@ -130,6 +130,8 @@ ParamControl::ParamControl(const QString &param, const QString &title, const QSt
 }
 
 void ParamControl::toggleClicked(bool state) {
+  const bool previous_state = params.getBool(key);
+
   auto do_confirm = [this]() {
     QString content("<body><h2 style=\"text-align: center;\">" + title_label->text() + "</h2><br>"
                     "<p style=\"text-align: center; margin: 0 128px; font-size: 50px;\">" + getDescription() + "</p></body>");
@@ -139,7 +141,10 @@ void ParamControl::toggleClicked(bool state) {
   bool confirmed = store_confirm && params.getBool(key + "Confirmed");
   if (!confirm || confirmed || !state || do_confirm()) {
     if (store_confirm && state) params.putBool(key + "Confirmed", true);
-    params.putBool(key, state);
+    if (previous_state != state) {
+      params.putBool(key, state);
+      onParamChanged();
+    }
     setIcon(state);
   } else {
     toggle.togglePosition();
