@@ -357,8 +357,20 @@ public:
                              float min_value, float max_value, const QString &label, const std::map<float, QString> &value_labels = {},
                              float interval = 1.0f, bool fast_increase = false, int label_width = 350)
                              : AbstractControl(title, desc, icon),
-                               fast_increase(fast_increase), interval(interval), label(label), min_value(min_value), max_value(max_value), value_labels(value_labels) {
-    factor = std::pow(10, std::ceil(-std::log10(interval)));
+                               value_label(nullptr),
+                               decrement_repeating(false),
+                               display_warning(false),
+                               fast_increase(fast_increase),
+                               increment_repeating(false),
+                               warning_shown(false),
+                               interval(interval),
+                               factor(std::pow(10, std::ceil(-std::log10(interval)))),
+                               max_value(max_value),
+                               min_value(min_value),
+                               previous_value(0.0f),
+                               value(0.0f),
+                               value_labels(value_labels),
+                               label(label) {
     key = param.toStdString();
 
     setupButton(decrement_button, "-");
@@ -430,11 +442,16 @@ public:
   }
 
   void refresh() {
-    value = std::clamp(std::round(params.getFloat(key) * factor) / factor, min_value, max_value);
+    const float stored_value = params.getFloat(key);
+
+    value = std::clamp(std::round(stored_value * factor) / factor, min_value, max_value);
     previous_value = value;
 
     updateDisplay();
-    updateParam();
+
+    if (std::abs(value - stored_value) > 1e-6f) {
+      updateParam();
+    }
   }
 
   void setWarning(const QString &newWarning) {
@@ -494,9 +511,10 @@ public:
   void updateValue() {
     value = std::round(value * factor) / factor;
 
-    emit valueChanged(value);
-
     updateDisplay();
+    updateParam();
+
+    emit valueChanged(value);
   }
 
 signals:
