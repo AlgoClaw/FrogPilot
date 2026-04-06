@@ -133,6 +133,7 @@ def backup_toggles(params_cache):
 
 def convert_params(params_cache):
   print("Starting to convert params")
+  aggressive_follow_migration_marker = Path("/cache/aggressive_follow_half_second_migrated")
 
   if Path("/cache/tracking").exists():
     params_tracking = Params("/cache/tracking")
@@ -146,7 +147,7 @@ def convert_params(params_cache):
 
     delete_file("/cache/tracking")
 
-  if not params.get_bool("AggressiveFollowHalfSecondMigration"):
+  if not aggressive_follow_migration_marker.exists():
     aggressive_follow = params.get("AggressiveFollow", encoding="utf-8")
     aggressive_follow_cache = params_cache.get("AggressiveFollow", encoding="utf-8")
 
@@ -166,7 +167,7 @@ def convert_params(params_cache):
       params_cache.put("AggressiveFollow", "0.5")
       print("Migrated AggressiveFollow to 0.5 seconds")
 
-    params.put_bool("AggressiveFollowHalfSecondMigration", True)
+    aggressive_follow_migration_marker.touch()
 
   print("Param conversion completed")
 
