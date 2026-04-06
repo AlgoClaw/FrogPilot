@@ -58,6 +58,18 @@ function mark_frogpilot_ui_sources_dirty {
   done
 }
 
+function ensure_larch64_libyuv {
+  local libyuv_archive="$DIR/third_party/libyuv/larch64/lib/libyuv.a"
+  local libyuv_builder="$DIR/third_party/libyuv/build.sh"
+
+  [ -f /TICI ] || return 0
+  [ -f "$libyuv_archive" ] && return 0
+  [ -x "$libyuv_builder" ] || return 1
+
+  echo "Missing larch64 libyuv archive, building it before rebuilding FrogPilot UI"
+  "$libyuv_builder"
+}
+
 function launch {
   # Remove orphaned git lock if it exists on boot
   [ -f "$DIR/.git/index.lock" ] && rm -f $DIR/.git/index.lock
@@ -120,6 +132,7 @@ function launch {
   if [ ! -f "$DIR/prebuilt" ]; then
     ./build.py
   elif [ "$force_prebuilt_build" -eq 1 ]; then
+    ensure_larch64_libyuv
     SCONS_TARGETS="selfdrive/ui/ui" ./build.py
   fi
   ./manager.py
