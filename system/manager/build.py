@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import shlex
 import subprocess
 from pathlib import Path
 
@@ -20,6 +21,7 @@ MAX_BUILD_PROGRESS = 100
 def build(spinner: Spinner, dirty: bool = False, minimal: bool = False) -> None:
   env = os.environ.copy()
   env['SCONS_PROGRESS'] = "1"
+  scons_targets = shlex.split(env.get("SCONS_TARGETS", ""))
   nproc = os.cpu_count()
   if nproc is None:
     nproc = 2
@@ -31,7 +33,7 @@ def build(spinner: Spinner, dirty: bool = False, minimal: bool = False) -> None:
   compile_output: list[bytes] = []
   for n in (nproc, nproc/2, 1):
     compile_output.clear()
-    scons: subprocess.Popen = subprocess.Popen(["scons", f"-j{int(n)}", "--cache-populate", *extra_args], cwd=BASEDIR, env=env, stderr=subprocess.PIPE)
+    scons: subprocess.Popen = subprocess.Popen(["scons", f"-j{int(n)}", "--cache-populate", *extra_args, *scons_targets], cwd=BASEDIR, env=env, stderr=subprocess.PIPE)
     assert scons.stderr is not None
 
     # Read progress from stderr and update spinner

@@ -117,8 +117,10 @@ function launch {
 
   # start manager
   cd system/manager
-  if [ ! -f "$DIR/prebuilt" ] || [ "$force_prebuilt_build" -eq 1 ]; then
+  if [ ! -f "$DIR/prebuilt" ]; then
     ./build.py
+  elif [ "$force_prebuilt_build" -eq 1 ]; then
+    SCONS_TARGETS="selfdrive/ui/ui" ./build.py
   fi
   ./manager.py
 
