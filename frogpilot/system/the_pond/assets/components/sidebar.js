@@ -112,10 +112,11 @@ export function Sidebar() {
 
                     const isActive = state.activeRoute === link.name;
                     const classList = [isActive && "active"].filter(Boolean).join(" ");
+                    const iconClass = `bi ${link.icon}`;
 
                     const content = html`
                       <div class="menu-item-link">
-                        <i class="bi ${link.icon}"></i>
+                        <i class="${iconClass}"></i>
                         <span>${upperFirst(link.name)}</span>
                       </div>
                     `;
@@ -139,6 +140,10 @@ function setupMenuButton() {
   const button = document.getElementById("menu_button");
   const sidebar = document.getElementById("sidebar");
   const underlay = document.getElementById("sidebarUnderlay");
+
+  if (!button || !sidebar || !underlay) {
+    return;
+  }
 
   button.addEventListener("click", () => {
     sidebar.classList.toggle("visible");

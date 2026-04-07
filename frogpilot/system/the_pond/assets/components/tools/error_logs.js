@@ -125,6 +125,7 @@ function Logviewer(filename, closeFn) {
     loading: true,
     content: ""
   });
+  const downloadHref = `/api/error_logs/${filename}`;
 
   ;(async () => {
     const res = await fetch(`/api/error_logs/${filename}`);
@@ -178,7 +179,7 @@ function Logviewer(filename, closeFn) {
       <button @click="${copyLog}">
         <i class="bi bi-clipboard"></i>
       </button>
-      <a href="/api/error_logs/${filename}" download>
+      <a href="${downloadHref}" download>
         <button>
           <i class="bi bi-download"></i>
         </button>
